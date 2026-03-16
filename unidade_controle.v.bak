@@ -9,7 +9,7 @@ module unidade_controle (
     input        errou,
     input        nivel_limite,
     input        fim_timer,
-    
+
     output reg   zera_jogo,
     output reg   fpga_pronta,
     output reg   captura_gabarito,
@@ -22,7 +22,7 @@ module unidade_controle (
 
     localparam INICIO           = 4'd0,
                ESPERA_PC        = 4'd1,
-               AGUARDAR_INPUT   = 4'd2,	
+               AGUARDAR_INPUT   = 4'd2,
                PROCESSAR_RES    = 4'd3,
                ACERTO           = 4'd4,
                ERRO             = 4'd5,
@@ -33,40 +33,34 @@ module unidade_controle (
     reg [3:0] Eatual, Eprox;
 
     always @(posedge clock or posedge reset) begin
-        if (reset) begin
-            Eatual <= INICIO;
-        end else if (reset_home) begin
-            Eatual <= INICIO;
-        end else begin
-            Eatual <= Eprox;
-        end
+        if (reset || reset_home) Eatual <= INICIO;
+        else                     Eatual <= Eprox;
     end
 
-    // Lógica de Próximo Estado (Permanece igual)
     always @(*) begin
         case (Eatual)
             INICIO:           Eprox = btn_iniciar ? ESPERA_PC : INICIO;
-            
+
             ESPERA_PC:        Eprox = pc_pronto ? AGUARDAR_INPUT : ESPERA_PC;
-            
+
             AGUARDAR_INPUT:   Eprox = (acertou || errou) ? PROCESSAR_RES : AGUARDAR_INPUT; 
-            
+
             PROCESSAR_RES: begin
                 if (acertou)      Eprox = ACERTO;
                 else if (errou)   Eprox = ERRO;
                 else              Eprox = PROCESSAR_RES;
             end
-            
+
             ACERTO:           Eprox = CHECK_LVL;
-            
-            CHECK_LVL:        Eprox = nivel_limite ? FINAL_VITORIA : ESPERA_PC;
-            
+
+            CHECK_LVL:        Eprox = nivel_limite ? FINAL_VITORIA : ESPERA_PC; // Se não for 15, pede nova fase ao PC
+
             ERRO:             Eprox = MOSTRA_RES_ERRO;
-            
+
             MOSTRA_RES_ERRO:  Eprox = fim_timer ? AGUARDAR_INPUT : MOSTRA_RES_ERRO;
-            
+
             FINAL_VITORIA:    Eprox = FINAL_VITORIA; 
-            
+
             default:          Eprox = INICIO;
         endcase
     end
@@ -80,34 +74,30 @@ module unidade_controle (
             INICIO: begin
                 zera_jogo = 1;
             end
-            
+
             ESPERA_PC: begin
                 fpga_pronta = 1;      
                 captura_gabarito = 1; 
             end
-            
+
             AGUARDAR_INPUT: begin
                 aguarda_player = 1;
             end
-            
+
             PROCESSAR_RES: begin
                 valida_res = 1;
             end
-            
+
             ACERTO: begin
                 proximo_nivel = 1;
             end
-            
+
             ERRO, MOSTRA_RES_ERRO: begin
                 sinaliza_erro = 1;
             end
-            
+
             FINAL_VITORIA: begin
                 vitoria = 1;
-            end
-            
-            default: begin
-                // Mantém os valores padrão já definidos acima
             end
         endcase
     end

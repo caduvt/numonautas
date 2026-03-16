@@ -33,23 +33,19 @@ module fluxo_dados (
     wire s_igual;
     wire s_jogada_feita;
     wire [3:0] s_sinal_leds;
-    
-    // Registrador interno para contagem de nível explícita
+
     reg [3:0] s_contador_nivel;
 
-    // --- Mapeamento de Status ---
     assign acertou = s_igual;
     assign errou   = ~s_igual;
 
     // 1. Contador de Nível (1 a 15)
     always @(posedge clock or posedge reset) begin
-        if (reset) begin
-            s_contador_nivel <= 4'd1; // Reset físico assíncrono
-        end else if (zera_jogo) begin
-            s_contador_nivel <= 4'd1; // Reset síncrono gerado pela UC
+        if (reset || zera_jogo) begin
+            s_contador_nivel <= 4'd1; // Começa sempre no nível 1
         end else if (proximo_nivel) begin
             if (s_contador_nivel < 4'd15) begin
-                s_contador_nivel <= s_contador_nivel + 4'd1;
+                s_contador_nivel <= s_contador_nivel + 1'b1;
             end
         end
     end
@@ -113,12 +109,10 @@ module fluxo_dados (
         .Q()
     );
 
-    // 8. Lógica de Display LEDs
     assign s_sinal_leds = (sinaliza_erro) ? 4'b1111 : s_registrador_out;
     assign leds = (sinaliza_erro || aguarda_player) ? s_sinal_leds : 4'b0000;
 
-    // Saídas
-    assign db_nivel = s_contador_nivel; 
+    assign db_nivel = s_contador_nivel;
     assign db_jogada = s_registrador_out;
 
 endmodule
