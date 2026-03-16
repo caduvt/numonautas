@@ -31,11 +31,13 @@ module numonautas (
     wire proximo_nivel;
     wire sinaliza_erro;
     wire escreve_mem;
+    wire reset_home;
 
     // Instanciação da Unidade de Controle
     unidade_controle uc (
         .clock(clock),
         .reset(reset),
+        .reset_home(reset_home), // Conexão nova
         .btn_iniciar(btn_iniciar_ext),
         .confirma_som(btn_confirma_som_ext),
         .confirma_dif(btn_confirma_dif_ext),
@@ -55,6 +57,7 @@ module numonautas (
     fluxo_dados dp (
         .clock(clock),
         .reset(reset),
+        .reset_home(reset_home),
         .zera_jogo(zera_jogo),
         .configura_params(configura_params),
         .gera_fase(gera_fase),

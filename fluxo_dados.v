@@ -35,7 +35,8 @@ module fluxo_dados (
     // Saídas de monitoramento e display
     output [3:0] leds,
     output [3:0] db_nivel,
-    output [3:0] db_jogada
+    output [3:0] db_jogada,
+    output reset_home,
 );
 
     // Fios internos
@@ -118,6 +119,16 @@ module fluxo_dados (
         .meio(),
         .Q()
     );
+
+    contador_m #(.M(3000), .N(28)) timer_reset_3s (
+    .clock(clock),
+    .zera_as(1'b0),
+    .zera_s(~btn_iniciar_ext || zera_jogo), // Zera se soltar o botão ou se já estiver no INICIO
+    .conta(btn_iniciar_ext),                // Conta enquanto o botão estiver segurado
+    .fim(reset_home),                       // Sinaliza quando atingir 3 segundos
+    .meio(),
+    .Q()
+);
 
     // 7. Lógica de Display LEDs (cor única) [cite: 16, 17]
     // Seleciona o que mostrar nos LEDs baseado no estado da UC

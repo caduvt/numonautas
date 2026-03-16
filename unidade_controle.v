@@ -12,6 +12,7 @@ module unidade_controle (
     input        nivel_limite,     // Nível == Limite
     input        fim_timer,        // Fim do tempo de exibição do erro
     input        reiniciar,        // Voltar ao início após vitória
+    input        reset_home,
     
     // Sinais de saída (Controle do Datapath)
     output reg   zera_jogo,
@@ -44,7 +45,7 @@ module unidade_controle (
 
     // Memória de Estado
     always @(posedge clock or posedge reset) begin
-        if (reset) Eatual <= INICIO;
+        if (reset || reset_home) Eatual <= INICIO;
         else       Eatual <= Eprox;
     end
 
