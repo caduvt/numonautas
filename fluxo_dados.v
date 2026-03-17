@@ -27,26 +27,27 @@ module fluxo_dados (
     output [3:0] db_nivel,
     output [3:0] db_jogada
 );
-
     wire [3:0] s_registrador_out;
     wire [3:0] s_gabarito_reg;
     wire s_igual;
     wire s_jogada_feita;
     wire [3:0] s_sinal_leds;
-    
     // Registrador interno para contagem de nível explícita
     reg [3:0] s_contador_nivel;
-
+    
     // --- Mapeamento de Status ---
-    assign acertou = s_igual;
-    assign errou   = ~s_igual;
-
+    wire tem_jogada = (s_registrador_out != 4'b0000); 
+    assign acertou = s_igual && tem_jogada;
+    assign errou   = ~s_igual && tem_jogada;
+    
     // 1. Contador de Nível (1 a 15)
     always @(posedge clock or posedge reset) begin
         if (reset) begin
-            s_contador_nivel <= 4'd1; // Reset físico assíncrono
+            s_contador_nivel <= 4'd1;
+        // Reset físico assíncrono
         end else if (zera_jogo) begin
-            s_contador_nivel <= 4'd1; // Reset síncrono gerado pela UC
+            s_contador_nivel <= 4'd1;
+        // Reset síncrono gerado pela UC
         end else if (proximo_nivel) begin
             if (s_contador_nivel < 4'd15) begin
                 s_contador_nivel <= s_contador_nivel + 4'd1;
@@ -56,7 +57,7 @@ module fluxo_dados (
 
     // Sinaliza à Unidade de Controle que chegou ao nível máximo
     assign nivel_limite = (s_contador_nivel == 4'd15);
-
+    
     // 2. Detector de Jogada
     edge_detector detector (
         .clock(clock),
@@ -64,16 +65,16 @@ module fluxo_dados (
         .sinal(|botoes),
         .pulso(s_jogada_feita)
     );
-
+    
     // 3. Registrador da Resposta do Usuário
     registrador_4 reg_jogada (
         .clock(clock),
-        .clear(zera_jogo),
+        .clear(zera_jogo || proximo_nivel || fim_timer),
         .enable(aguarda_player && s_jogada_feita),
         .D(botoes),
         .Q(s_registrador_out)
     );
-
+    
     // 4. Registrador do Gabarito do PC
     registrador_4 reg_gabarito (
         .clock(clock),
@@ -82,7 +83,7 @@ module fluxo_dados (
         .D(resposta_pc),
         .Q(s_gabarito_reg)
     );
-
+    
     // 5. Comparador (Resposta do Usuário vs Gabarito do PC)
     comparador_85 comparador_res (
         .A(s_gabarito_reg),
@@ -90,7 +91,7 @@ module fluxo_dados (
         .AEBi(1'b1), .AGBi(1'b0), .ALBi(1'b0),
         .AEBo(s_igual), .ALBo(), .AGBo()
     );
-
+    
     // 6. Timer de Exibição de Erro
     contador_m #(.M(2000), .N(11)) timer_exibicao (
         .clock(clock),
@@ -101,9 +102,9 @@ module fluxo_dados (
         .meio(),
         .Q()
     );
-
+    
     // 7. Timer de Reset de 3 Segundos (Ajustar M de acordo com o Clock)
-    contador_m #(.M(150000000), .N(28)) timer_reset_3s (
+    contador_m #(.M(200), .N(28)) timer_reset_3s (
         .clock(clock),
         .zera_as(1'b0),
         .zera_s(~btn_iniciar_ext || zera_jogo),
@@ -112,13 +113,13 @@ module fluxo_dados (
         .meio(),
         .Q()
     );
-
+    
     // 8. Lógica de Display LEDs
     assign s_sinal_leds = (sinaliza_erro) ? 4'b1111 : s_registrador_out;
     assign leds = (sinaliza_erro || aguarda_player) ? s_sinal_leds : 4'b0000;
 
     // Saídas
-    assign db_nivel = s_contador_nivel; 
+    assign db_nivel = s_contador_nivel;
     assign db_jogada = s_registrador_out;
 
 endmodule

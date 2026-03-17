@@ -8,7 +8,8 @@ module numonautas (
 
     // Interface com o Notebook
     input  [3:0] resposta_pc,     // Gabarito enviado pelo PC
-    input        pc_pronto,       // PC avisa que o gabarito é válido
+    input        pc_pronto,      
+    // PC avisa que o gabarito é válido
     output       fpga_pronta,     // FPGA pede a próxima fase ao PC
 
     // Saídas de monitoramento e display
@@ -22,7 +23,6 @@ module numonautas (
     output       acertou,
     output       errou
 );
-
     wire zera_jogo;
     wire aguarda_player;
     wire valida_res;
@@ -30,7 +30,8 @@ module numonautas (
     wire sinaliza_erro;
     wire reset_home;
     wire captura_gabarito;
-
+    wire s_vitoria;
+    
     unidade_controle uc (
         .clock(clock),
         .reset(reset),
@@ -47,9 +48,10 @@ module numonautas (
         .aguarda_player(aguarda_player),
         .valida_res(valida_res),
         .proximo_nivel(proximo_nivel),
-        .sinaliza_erro(sinaliza_erro)
+        .sinaliza_erro(sinaliza_erro),
+        .vitoria(s_vitoria)
     );
-
+    
     fluxo_dados dp (
         .clock(clock),
         .reset(reset),
@@ -71,7 +73,4 @@ module numonautas (
         .acertou(acertou),
         .errou(errou)
     );
-
 endmodule
-
-
