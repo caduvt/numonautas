@@ -1,0 +1,274 @@
+[
+  {
+    "id": "easy-level1-1",
+    "difficulty": "easy",
+    "level": 1,
+    "type": "expression",
+    "question": "2 + 3 = ?",
+    "options": ["4", "5", "6", "3"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level1-2",
+    "difficulty": "easy",
+    "level": 1,
+    "type": "expression",
+    "question": "1 + 6 = ?",
+    "options": ["6", "7", "8", "5"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level1-3",
+    "difficulty": "easy",
+    "level": 1,
+    "type": "expression",
+    "question": "9 - 5 = ?",
+    "options": ["3", "4", "5", "2"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level1-4",
+    "difficulty": "easy",
+    "level": 1,
+    "type": "expression",
+    "question": "7 - 2 = ?",
+    "options": ["6", "5", "4", "3"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level1-5",
+    "difficulty": "easy",
+    "level": 1,
+    "type": "expression",
+    "question": "3 + 4 = ?",
+    "options": ["6", "7", "8", "5"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level1-6",
+    "difficulty": "easy",
+    "level": 1,
+    "type": "expression",
+    "question": "5 + 2 = ?",
+    "options": ["6", "7", "8", "5"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level1-7",
+    "difficulty": "easy",
+    "level": 1,
+    "type": "expression",
+    "question": "8 - 3 = ?",
+    "options": ["6", "5", "4", "7"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level1-8",
+    "difficulty": "easy",
+    "level": 1,
+    "type": "expression",
+    "question": "6 - 1 = ?",
+    "options": ["4", "5", "6", "3"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level1-9",
+    "difficulty": "easy",
+    "level": 1,
+    "type": "expression",
+    "question": "4 + 4 = ?",
+    "options": ["7", "8", "9", "6"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level1-10",
+    "difficulty": "easy",
+    "level": 1,
+    "type": "expression",
+    "question": "10 - 6 = ?",
+    "options": ["3", "4", "5", "2"],
+    "correctIndex": 1
+  },
+
+  {
+    "id": "easy-level2-1",
+    "difficulty": "easy",
+    "level": 2,
+    "type": "expression",
+    "question": "5 + 6 = ?",
+    "options": ["10", "11", "12", "9"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level2-2",
+    "difficulty": "easy",
+    "level": 2,
+    "type": "expression",
+    "question": "9 + 3 = ?",
+    "options": ["11", "12", "13", "10"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level2-3",
+    "difficulty": "easy",
+    "level": 2,
+    "type": "expression",
+    "question": "12 - 5 = ?",
+    "options": ["6", "7", "8", "5"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level2-4",
+    "difficulty": "easy",
+    "level": 2,
+    "type": "expression",
+    "question": "11 - 3 = ?",
+    "options": ["7", "8", "9", "6"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level2-5",
+    "difficulty": "easy",
+    "level": 2,
+    "type": "expression",
+    "question": "4 + 7 = ?",
+    "options": ["10", "11", "12", "9"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level2-6",
+    "difficulty": "easy",
+    "level": 2,
+    "type": "expression",
+    "question": "8 + 5 = ?",
+    "options": ["12", "13", "14", "11"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level2-7",
+    "difficulty": "easy",
+    "level": 2,
+    "type": "expression",
+    "question": "14 - 6 = ?",
+    "options": ["7", "8", "9", "6"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level2-8",
+    "difficulty": "easy",
+    "level": 2,
+    "type": "expression",
+    "question": "13 - 4 = ?",
+    "options": ["8", "9", "10", "7"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level2-9",
+    "difficulty": "easy",
+    "level": 2,
+    "type": "expression",
+    "question": "6 + 6 = ?",
+    "options": ["11", "12", "13", "10"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level2-10",
+    "difficulty": "easy",
+    "level": 2,
+    "type": "expression",
+    "question": "15 - 7 = ?",
+    "options": ["7", "8", "9", "6"],
+    "correctIndex": 1
+  },
+
+  {
+    "id": "easy-level3-1",
+    "difficulty": "easy",
+    "level": 3,
+    "type": "expression",
+    "question": "5 + 6 - 3 = ?",
+    "options": ["7", "8", "9", "6"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level3-2",
+    "difficulty": "easy",
+    "level": 3,
+    "type": "expression",
+    "question": "10 - 4 + 2 = ?",
+    "options": ["7", "8", "9", "6"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level3-3",
+    "difficulty": "easy",
+    "level": 3,
+    "type": "expression",
+    "question": "8 + 3 - 5 = ?",
+    "options": ["5", "6", "7", "4"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level3-4",
+    "difficulty": "easy",
+    "level": 3,
+    "type": "expression",
+    "question": "12 - 6 + 3 = ?",
+    "options": ["8", "9", "10", "7"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level3-5",
+    "difficulty": "easy",
+    "level": 3,
+    "type": "expression",
+    "question": "7 + 5 - 4 = ?",
+    "options": ["7", "8", "9", "6"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level3-6",
+    "difficulty": "easy",
+    "level": 3,
+    "type": "expression",
+    "question": "9 + 2 - 6 = ?",
+    "options": ["4", "5", "6", "3"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level3-7",
+    "difficulty": "easy",
+    "level": 3,
+    "type": "expression",
+    "question": "11 - 5 + 2 = ?",
+    "options": ["7", "8", "9", "6"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level3-8",
+    "difficulty": "easy",
+    "level": 3,
+    "type": "expression",
+    "question": "6 + 4 - 3 = ?",
+    "options": ["6", "7", "8", "5"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level3-9",
+    "difficulty": "easy",
+    "level": 3,
+    "type": "expression",
+    "question": "10 - 2 + 1 = ?",
+    "options": ["8", "9", "10", "7"],
+    "correctIndex": 1
+  },
+  {
+    "id": "easy-level3-10",
+    "difficulty": "easy",
+    "level": 3,
+    "type": "expression",
+    "question": "4 + 8 - 6 = ?",
+    "options": ["5", "6", "7", "4"],
+    "correctIndex": 1
+  }
+]
