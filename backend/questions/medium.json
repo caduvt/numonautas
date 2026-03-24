@@ -1,0 +1,274 @@
+[
+  {
+    "id": "medium-level1-1",
+    "difficulty": "medium",
+    "level": 1,
+    "type": "expression",
+    "question": "3 × 4 = ?",
+    "options": ["12", "10", "14", "8"],
+    "correctIndex": 0
+  },
+  {
+    "id": "medium-level1-2",
+    "difficulty": "medium",
+    "level": 1,
+    "type": "expression",
+    "question": "6 × 2 = ?",
+    "options": ["10", "12", "14", "8"],
+    "correctIndex": 1
+  },
+  {
+    "id": "medium-level1-3",
+    "difficulty": "medium",
+    "level": 1,
+    "type": "expression",
+    "question": "12 ÷ 3 = ?",
+    "options": ["3", "4", "5", "6"],
+    "correctIndex": 1
+  },
+  {
+    "id": "medium-level1-4",
+    "difficulty": "medium",
+    "level": 1,
+    "type": "expression",
+    "question": "15 ÷ 5 = ?",
+    "options": ["2", "3", "4", "5"],
+    "correctIndex": 1
+  },
+  {
+    "id": "medium-level1-5",
+    "difficulty": "medium",
+    "level": 1,
+    "type": "expression",
+    "question": "4 × 5 = ?",
+    "options": ["20", "18", "22", "16"],
+    "correctIndex": 0
+  },
+  {
+    "id": "medium-level1-6",
+    "difficulty": "medium",
+    "level": 1,
+    "type": "expression",
+    "question": "18 ÷ 6 = ?",
+    "options": ["2", "3", "4", "5"],
+    "correctIndex": 1
+  },
+  {
+    "id": "medium-level1-7",
+    "difficulty": "medium",
+    "level": 1,
+    "type": "expression",
+    "question": "7 × 3 = ?",
+    "options": ["20", "21", "22", "18"],
+    "correctIndex": 1
+  },
+  {
+    "id": "medium-level1-8",
+    "difficulty": "medium",
+    "level": 1,
+    "type": "expression",
+    "question": "20 ÷ 4 = ?",
+    "options": ["4", "5", "6", "3"],
+    "correctIndex": 1
+  },
+  {
+    "id": "medium-level1-9",
+    "difficulty": "medium",
+    "level": 1,
+    "type": "expression",
+    "question": "5 × 6 = ?",
+    "options": ["30", "28", "32", "26"],
+    "correctIndex": 0
+  },
+  {
+    "id": "medium-level1-10",
+    "difficulty": "medium",
+    "level": 1,
+    "type": "expression",
+    "question": "16 ÷ 2 = ?",
+    "options": ["6", "7", "8", "9"],
+    "correctIndex": 2
+  },
+
+  {
+    "id": "medium-level2-1",
+    "difficulty": "medium",
+    "level": 2,
+    "type": "expression",
+    "question": "5 × 3 + 2 = ?",
+    "options": ["15", "17", "13", "12"],
+    "correctIndex": 1
+  },
+  {
+    "id": "medium-level2-2",
+    "difficulty": "medium",
+    "level": 2,
+    "type": "expression",
+    "question": "4 × 6 + 1 = ?",
+    "options": ["25", "24", "23", "26"],
+    "correctIndex": 0
+  },
+  {
+    "id": "medium-level2-3",
+    "difficulty": "medium",
+    "level": 2,
+    "type": "expression",
+    "question": "12 ÷ 3 + 4 = ?",
+    "options": ["7", "8", "9", "6"],
+    "correctIndex": 1
+  },
+  {
+    "id": "medium-level2-4",
+    "difficulty": "medium",
+    "level": 2,
+    "type": "expression",
+    "question": "20 ÷ 5 + 3 = ?",
+    "options": ["6", "7", "8", "5"],
+    "correctIndex": 1
+  },
+  {
+    "id": "medium-level2-5",
+    "difficulty": "medium",
+    "level": 2,
+    "type": "expression",
+    "question": "3 × 7 - 2 = ?",
+    "options": ["19", "20", "21", "18"],
+    "correctIndex": 0
+  },
+  {
+    "id": "medium-level2-6",
+    "difficulty": "medium",
+    "level": 2,
+    "type": "expression",
+    "question": "6 × 4 - 5 = ?",
+    "options": ["19", "20", "18", "17"],
+    "correctIndex": 0
+  },
+  {
+    "id": "medium-level2-7",
+    "difficulty": "medium",
+    "level": 2,
+    "type": "expression",
+    "question": "15 ÷ 3 + 6 = ?",
+    "options": ["10", "11", "9", "12"],
+    "correctIndex": 1
+  },
+  {
+    "id": "medium-level2-8",
+    "difficulty": "medium",
+    "level": 2,
+    "type": "expression",
+    "question": "18 ÷ 2 - 3 = ?",
+    "options": ["6", "7", "8", "5"],
+    "correctIndex": 0
+  },
+  {
+    "id": "medium-level2-9",
+    "difficulty": "medium",
+    "level": 2,
+    "type": "expression",
+    "question": "8 × 3 + 1 = ?",
+    "options": ["24", "25", "23", "26"],
+    "correctIndex": 1
+  },
+  {
+    "id": "medium-level2-10",
+    "difficulty": "medium",
+    "level": 2,
+    "type": "expression",
+    "question": "9 × 2 + 5 = ?",
+    "options": ["23", "22", "21", "24"],
+    "correctIndex": 0
+  },
+
+  {
+    "id": "medium-level3-1",
+    "difficulty": "medium",
+    "level": 3,
+    "type": "expression",
+    "question": "6 × (2 + 1) = ?",
+    "options": ["18", "12", "16", "20"],
+    "correctIndex": 0
+  },
+  {
+    "id": "medium-level3-2",
+    "difficulty": "medium",
+    "level": 3,
+    "type": "expression",
+    "question": "4 × (3 + 2) = ?",
+    "options": ["20", "18", "22", "16"],
+    "correctIndex": 0
+  },
+  {
+    "id": "medium-level3-3",
+    "difficulty": "medium",
+    "level": 3,
+    "type": "expression",
+    "question": "(12 ÷ 3) × 2 = ?",
+    "options": ["6", "8", "10", "12"],
+    "correctIndex": 1
+  },
+  {
+    "id": "medium-level3-4",
+    "difficulty": "medium",
+    "level": 3,
+    "type": "expression",
+    "question": "(15 ÷ 5) × 4 = ?",
+    "options": ["10", "12", "14", "16"],
+    "correctIndex": 1
+  },
+  {
+    "id": "medium-level3-5",
+    "difficulty": "medium",
+    "level": 3,
+    "type": "expression",
+    "question": "3 × (6 + 2) = ?",
+    "options": ["24", "26", "22", "20"],
+    "correctIndex": 0
+  },
+  {
+    "id": "medium-level3-6",
+    "difficulty": "medium",
+    "level": 3,
+    "type": "expression",
+    "question": "(18 ÷ 3) + 4 = ?",
+    "options": ["9", "10", "11", "8"],
+    "correctIndex": 1
+  },
+  {
+    "id": "medium-level3-7",
+    "difficulty": "medium",
+    "level": 3,
+    "type": "expression",
+    "question": "(20 ÷ 4) × 3 = ?",
+    "options": ["12", "15", "18", "10"],
+    "correctIndex": 1
+  },
+  {
+    "id": "medium-level3-8",
+    "difficulty": "medium",
+    "level": 3,
+    "type": "expression",
+    "question": "5 × (4 + 1) = ?",
+    "options": ["25", "20", "30", "15"],
+    "correctIndex": 0
+  },
+  {
+    "id": "medium-level3-9",
+    "difficulty": "medium",
+    "level": 3,
+    "type": "expression",
+    "question": "(16 ÷ 2) + 3 = ?",
+    "options": ["10", "11", "12", "9"],
+    "correctIndex": 1
+  },
+  {
+    "id": "medium-level3-10",
+    "difficulty": "medium",
+    "level": 3,
+    "type": "expression",
+    "question": "2 × (5 + 3) = ?",
+    "options": ["14", "16", "18", "12"],
+    "correctIndex": 1
+  }
+]
