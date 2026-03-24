@@ -13,7 +13,7 @@ module fluxo_dados (
     // Entradas
     input  [3:0] botoes,
     input        btn_iniciar_ext,
-    input  [3:0] resposta_pc,
+    input  [7:0] resposta_pc,
     
     // Status
     output       acertou,
@@ -80,7 +80,7 @@ module fluxo_dados (
         .clock(clock),
         .clear(zera_jogo),
         .enable(captura_gabarito),
-        .D(resposta_pc),
+        .D(resposta_pc[3:0]), //pega os 4 da direita
         .Q(s_gabarito_reg)
     );
     
@@ -93,7 +93,7 @@ module fluxo_dados (
     );
     
     // 6. Timer de Exibição de Erro
-    contador_m #(.M(2000), .N(11)) timer_exibicao (
+    contador_m #(.M(100000000), .N(11)) timer_exibicao (
         .clock(clock),
         .zera_as(1'b0),
         .zera_s(zera_jogo || proximo_nivel),
@@ -104,7 +104,7 @@ module fluxo_dados (
     );
     
     // 7. Timer de Reset de 3 Segundos (Ajustar M de acordo com o Clock)
-    contador_m #(.M(200), .N(28)) timer_reset_3s (
+    contador_m #(.M(150000000), .N(28)) timer_reset_3s (
         .clock(clock),
         .zera_as(1'b0),
         .zera_s(~btn_iniciar_ext || zera_jogo),
