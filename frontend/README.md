@@ -8,6 +8,8 @@ Há também uma tela de configurações, permitindo ativar ou desativar sons e e
 
 Trata-se de um frontend simples com Vite + React, usando React Router para navegação.
 
+## Execução
+
 Para iniciar, basta executar os comandos a seguir
 
 ```
