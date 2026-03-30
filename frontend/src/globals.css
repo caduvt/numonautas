@@ -72,6 +72,30 @@
   }
 }
 
+@keyframes swayAstronaut {
+  0%, 100% {
+    transform: rotate(-30deg) translateY(0);
+  }
+  50% {
+    transform: rotate(30deg) translateY(-8px);
+  }
+}
+
+@keyframes errorJiggle {
+  0%, 100% {
+    transform: translateX(0) scale(1);
+  }
+  25% {
+    transform: translateX(-6px) rotate(-6deg) scale(0.95);
+  }
+  50% {
+    transform: translateX(6px) rotate(6deg) scale(0.95);
+  }
+  75% {
+    transform: translateX(-6px) rotate(-6deg) scale(0.95);
+  }
+}
+
 @keyframes confettiFall {
   0% {
     opacity: 1;
@@ -86,4 +110,12 @@
 /* ── Utility classes ──────────────────────────────────────── */
 .float {
   animation: floatBob 3.5s ease-in-out infinite;
+}
+
+.animate-sway {
+  animation: swayAstronaut 6s ease-in-out infinite;
+}
+
+.animate-error-jiggle {
+  animation: errorJiggle 0.4s ease-in-out 1;
 }
