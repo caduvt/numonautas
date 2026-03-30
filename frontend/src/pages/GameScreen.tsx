@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from "react";
 import { useGameContext } from "../context/GameContext";
 import { useGameHardware } from "../hooks/useGameHardware";
@@ -112,23 +113,31 @@ export function GameScreen() {
               if (wrongFeedback) {
                 if (isSelected) {
                   // Gently fade the selected wrong answer
-                  classes += "bg-slate-800/60 border-slate-700/50 text-slate-500 opacity-50 grayscale ";
+                  classes +=
+                    "bg-slate-800/60 border-slate-700/50 text-slate-500 opacity-50 grayscale ";
                 } else if (isCorrectOption) {
                   // Softly highlight the right one
-                  classes += `${colorClasses[index % 4]} ring-4 ring-white/70 scale-105 ${config.animacoes_enabled ? "animate-pulse" : ""} `;
+                  classes += `${
+                    colorClasses[index % 4]
+                  } ring-4 ring-white/70 scale-105 ${
+                    config.animacoes_enabled ? "animate-pulse" : ""
+                  } `;
                 } else {
-                  classes += "bg-slate-800/60 border-slate-700/50 text-slate-400 opacity-60 grayscale ";
+                  classes +=
+                    "bg-slate-800/60 border-slate-700/50 text-slate-400 opacity-60 grayscale ";
                 }
               } else if (isSelected && isCorrect === true) {
-                classes += `${colorClasses[index % 4]} ring-8 ring-white scale-110 z-10 `;
+                classes += `${
+                  colorClasses[index % 4]
+                } ring-8 ring-white scale-110 z-10 `;
               } else {
                 classes += colorClasses[index % 4];
               }
 
               // Configuração do "Shake" do botão errado
               const buttonShakeConfig = {
-                x: [-10, 10, -8, 8, -6, 6, 0], 
-                transition: { duration: 0.5, ease: "easeInOut" as const }
+                x: [-10, 10, -8, 8, -6, 6, 0],
+                transition: { duration: 0.5, ease: "easeInOut" as const },
               };
 
               return (
@@ -136,8 +145,16 @@ export function GameScreen() {
                   key={index}
                   onClick={() => mockAnswer(index)} // Allow overriding state on click for Dev mostly
                   disabled={isCorrect !== null} // Disable while showing feedback
-                  animate={wrongFeedback && isSelected && config.animacoes_enabled ? { x: buttonShakeConfig.x } : { x: 0 }}
-                  transition={wrongFeedback && isSelected && config.animacoes_enabled ? buttonShakeConfig.transition : {}}
+                  animate={
+                    wrongFeedback && isSelected && config.animacoes_enabled
+                      ? { x: buttonShakeConfig.x }
+                      : { x: 0 }
+                  }
+                  transition={
+                    wrongFeedback && isSelected && config.animacoes_enabled
+                      ? buttonShakeConfig.transition
+                      : {}
+                  }
                   className={`
                     flex items-center justify-center p-4 md:p-6 rounded-3xl border-4 
                     text-5xl md:text-[5rem] lg:text-[6rem] font-bold font-nunito tracking-widest min-w-[2rem]
@@ -153,7 +170,11 @@ export function GameScreen() {
           {/* Correction helper text */}
           {isCorrect === false && (
             <motion.div
-              initial={config.animacoes_enabled ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
+              initial={
+                config.animacoes_enabled
+                  ? { opacity: 0, y: 10 }
+                  : { opacity: 1, y: 0 }
+              }
               animate={{ opacity: 1, y: 0 }}
               className="mt-8 text-center"
             >

@@ -5,6 +5,9 @@ module numonautas (
     // Entradas do Usuário
     input  [3:0] botoes,
     input        btn_iniciar_ext, // Iniciar e Reiniciar (segurar 3s)
+    input        btn_som,
+    input        btn_dificuldade,
+    input        btn_animacoes,
 
     // Interface com o Notebook
     input  [3:0] resposta_pc,     // Gabarito enviado pelo PC
@@ -41,6 +44,34 @@ module numonautas (
     wire       w_pc_pronto;
     wire       w_fpga_pronta;
 
+    // Fios internos para Event Manager
+    wire pulso_som, pulso_difi, pulso_anim, pulso_iniciar;
+    wire pulso_r0, pulso_r1, pulso_r2, pulso_r3;
+    wire w_tx_pronto;
+    wire w_tx_partida;
+    wire [7:0] w_tx_dados;
+
+    // Detectores de borda p/ enviar cliques
+    edge_detector ed_som(.clock(clock), .reset(reset), .sinal(btn_som), .pulso(pulso_som));
+    edge_detector ed_difi(.clock(clock), .reset(reset), .sinal(btn_dificuldade), .pulso(pulso_difi));
+    edge_detector ed_anim(.clock(clock), .reset(reset), .sinal(btn_animacoes), .pulso(pulso_anim));
+    edge_detector ed_ini(.clock(clock), .reset(reset), .sinal(btn_iniciar_ext), .pulso(pulso_iniciar));
+    
+    edge_detector ed_r0(.clock(clock), .reset(reset), .sinal(botoes[0]), .pulso(pulso_r0));
+    edge_detector ed_r1(.clock(clock), .reset(reset), .sinal(botoes[1]), .pulso(pulso_r1));
+    edge_detector ed_r2(.clock(clock), .reset(reset), .sinal(botoes[2]), .pulso(pulso_r2));
+    edge_detector ed_r3(.clock(clock), .reset(reset), .sinal(botoes[3]), .pulso(pulso_r3));
+
+    // Instanciação do Queue Manager (Arbitra qual pacote eviar no TX)
+    tx_event_manager event_manager (
+        .clock(clock), .reset(reset),
+        .pulso_som(pulso_som), .pulso_dificuldade(pulso_difi), .pulso_animacoes(pulso_anim),
+        .pulso_start(pulso_iniciar), .pulso_reset(reset_home), // reset_home gerado na holding de 3s do btn
+        .pulso_proxima_fase(w_fpga_pronta),
+        .pulso_resp_0(pulso_r0), .pulso_resp_1(pulso_r1), .pulso_resp_2(pulso_r2), .pulso_resp_3(pulso_r3),
+        .tx_pronto(w_tx_pronto), .tx_partida(w_tx_partida), .tx_dados(w_tx_dados)
+    );
+
     // ---> INSTÂNCIA DO RECEPTOR (RX) <---
     // Ele escuta o pino RX e gera o gabarito e o aviso de pc_pronto
     rx_serial_8N1 receptor (
@@ -52,14 +83,14 @@ module numonautas (
     );
 
     // ---> INSTÂNCIA DO TRANSMISSOR (TX) <---
-    // A FPGA usa ele para avisar o PC que quer uma nova fase
+    // A FPGA usa ele para avisar o PC de status, de request e botoes config
     tx_serial_7N2 transmissor (
         .clock       (clock),
         .reset       (reset),
-        .partida     (w_fpga_pronta), // A UC dá o gatilho
-        .dados_ascii (8'h50),         // Manda a letra 'P' (0x50 em HEX) para o PC
+        .partida     (w_tx_partida),
+        .dados_ascii (w_tx_dados),
         .saida_serial(TX),
-        .pronto      ()
+        .pronto      (w_tx_pronto)
     );
     
     unidade_controle uc (
