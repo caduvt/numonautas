@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
 import { Star } from "lucide-react";
 import { motion } from "framer-motion";
+import useSound from "use-sound";
 
 interface FeedbackUIProps {
   isCorrect: boolean | null;
@@ -12,6 +13,7 @@ interface FeedbackUIProps {
 
 export function FeedbackUI({ isCorrect, audioEnabled, animacoesEnabled, onContinue }: FeedbackUIProps) {
   const [show, setShow] = useState<boolean>(false);
+  const [playSuccess] = useSound('/sounds/success.mp3', { volume: 0.5 });
 
   useEffect(() => {
     if (isCorrect === null) {
@@ -38,8 +40,8 @@ export function FeedbackUI({ isCorrect, audioEnabled, animacoesEnabled, onContin
       }
 
       if (audioEnabled) {
-        // play soft chime sound (mock for now)
-        // new Audio('/sounds/success_chime.mp3').play();
+        // Play positive sound reward
+        playSuccess();
       }
 
       // Auto continue after success
@@ -49,12 +51,10 @@ export function FeedbackUI({ isCorrect, audioEnabled, animacoesEnabled, onContin
       return () => clearTimeout(timer);
     } else {
       // Wrong answer
-      if (audioEnabled) {
-        // play gentle pop sound (no buzzer)
-        // new Audio('/sounds/gentle_pop.mp3').play();
-      }
+      // Usuário pediu explicitamente para evitar feedback sonoro negativo.
+      // Apenas não tocamos nada aqui.
     }
-  }, [isCorrect, audioEnabled, onContinue]);
+  }, [isCorrect, audioEnabled, onContinue, animacoesEnabled, playSuccess]);
 
   function fire(particleRatio: number, opts: any) {
     confetti(Object.assign({}, opts, {

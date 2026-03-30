@@ -3,9 +3,10 @@ import { motion, type Variants } from "framer-motion";
 
 interface SpaceAvatarProps {
   status?: 'idle' | 'happy' | 'thinking' | 'surprised';
+  scale?: number;
 }
 
-export function SpaceAvatar({ status = 'idle' }: SpaceAvatarProps) {
+export function SpaceAvatar({ status = 'idle', scale = 1 }: SpaceAvatarProps) {
   // Configurações do "Shake" (Tremor/Surpresa)
   // Para mudar a intensidade (o quão longe ele vai pro lado), aumente ou diminua os valores de 'x' no array.
   // Para mudar o quanto ele inclina, mexa no 'rotate'.
@@ -21,16 +22,14 @@ export function SpaceAvatar({ status = 'idle' }: SpaceAvatarProps) {
       transition: { duration: 3.5, repeat: Infinity, ease: "easeInOut" }
     },
     happy: {
-      y: [0, -15, 0],
-      rotate: 0,
+      y: [0, -30, 0],
       scale: 1,
-      transition: { duration: 0.6, repeat: Infinity, ease: "easeOut" }
+      transition: { duration: 1, repeat: Infinity, ease: "easeOut" }
     },
     thinking: {
       rotate: [-15, 15, -15],
       y: [0, -8, 0],
-      scale: 1,
-      transition: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+      transition: { duration: 10, repeat: Infinity, ease: "easeInOut" }
     },
     surprised: {
       x: [0, -shakeIntensityX, shakeIntensityX, -shakeIntensityX, 0],
@@ -52,7 +51,10 @@ export function SpaceAvatar({ status = 'idle' }: SpaceAvatarProps) {
   };
 
   return (
-    <div className="relative w-32 h-32 md:w-40 md:h-40 flex items-center justify-center">
+    <div 
+      className="relative w-32 h-32 md:w-40 md:h-40 flex items-center justify-center"
+      style={{ transform: `scale(${scale})` }}
+    >
       <motion.div
         variants={variants}
         animate={status}
