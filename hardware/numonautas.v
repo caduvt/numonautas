@@ -9,15 +9,9 @@ module numonautas (
     input        btn_dificuldade,
     input        btn_animacoes,
 
-    // Interface com o Notebook
-    input  [3:0] resposta_pc,     // Gabarito enviado pelo PC
-    input        pc_pronto,    
-
     // novas entradas para a comunicação serial (RX e TX)
     input        RX,
     output       TX,  
-    // PC avisa que o gabarito é válido
-    output       fpga_pronta,     // FPGA pede a próxima fase ao PC
 
     // Saídas de monitoramento e display
     output [3:0] leds,
@@ -46,6 +40,8 @@ module numonautas (
 
     // Fios internos para Event Manager
     wire pulso_som, pulso_difi, pulso_anim, pulso_iniciar;
+    wire w_em_jogo;
+    wire pulso_acertou, pulso_errou;
     wire pulso_r0, pulso_r1, pulso_r2, pulso_r3;
     wire w_tx_pronto;
     wire w_tx_partida;
@@ -57,18 +53,19 @@ module numonautas (
     edge_detector ed_anim(.clock(clock), .reset(reset), .sinal(btn_animacoes), .pulso(pulso_anim));
     edge_detector ed_ini(.clock(clock), .reset(reset), .sinal(btn_iniciar_ext), .pulso(pulso_iniciar));
     
-    edge_detector ed_r0(.clock(clock), .reset(reset), .sinal(botoes[0]), .pulso(pulso_r0));
-    edge_detector ed_r1(.clock(clock), .reset(reset), .sinal(botoes[1]), .pulso(pulso_r1));
-    edge_detector ed_r2(.clock(clock), .reset(reset), .sinal(botoes[2]), .pulso(pulso_r2));
-    edge_detector ed_r3(.clock(clock), .reset(reset), .sinal(botoes[3]), .pulso(pulso_r3));
+    // Antigos edge detectors dos botoes foram removidos porque a comparacao agora
+    // gera o pulso de acerto/erro depois do processamento, entao checamos as transicoes deles.
+    edge_detector ed_acertou(.clock(clock), .reset(reset), .sinal(acertou), .pulso(pulso_acertou));
+    edge_detector ed_errou(.clock(clock), .reset(reset), .sinal(errou), .pulso(pulso_errou));
 
     // Instanciação do Queue Manager (Arbitra qual pacote eviar no TX)
     tx_event_manager event_manager (
         .clock(clock), .reset(reset),
+        .em_jogo(w_em_jogo),
         .pulso_som(pulso_som), .pulso_dificuldade(pulso_difi), .pulso_animacoes(pulso_anim),
         .pulso_start(pulso_iniciar), .pulso_reset(reset_home), // reset_home gerado na holding de 3s do btn
         .pulso_proxima_fase(w_fpga_pronta),
-        .pulso_resp_0(pulso_r0), .pulso_resp_1(pulso_r1), .pulso_resp_2(pulso_r2), .pulso_resp_3(pulso_r3),
+        .pulso_acertou(pulso_acertou), .pulso_errou(pulso_errou),
         .tx_pronto(w_tx_pronto), .tx_partida(w_tx_partida), .tx_dados(w_tx_dados)
     );
 
@@ -105,6 +102,7 @@ module numonautas (
         .fim_timer(fim_timer),
         .zera_jogo(zera_jogo),
         .fpga_pronta(w_fpga_pronta), //nova conexão do sinal fpga_pronta para o transmissor serial
+        .em_jogo(w_em_jogo),         //Indica se a config está bloqueada
         .captura_gabarito(captura_gabarito),
         .aguarda_player(aguarda_player),
         .valida_res(valida_res),

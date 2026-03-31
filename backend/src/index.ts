@@ -1,6 +1,6 @@
 import { WS_PORT } from './config';
 import { wsManager } from './websocket';
-import { initSerial } from './serial';
+import { initSerial, sendToFPGA } from './serial';
 import { gameState, loadRandomQuestion } from './gameLogic';
 
 function initBackend() {
@@ -18,6 +18,7 @@ function initBackend() {
           type: "NEW_QUESTION",
           question: q
         });
+        sendToFPGA(1 << q.correct_index);
       }
     }
     // Handle mock start via WS
@@ -31,6 +32,7 @@ function initBackend() {
           state: "playing",
           first_question: q
         });
+        sendToFPGA(1 << q.correct_index);
       }
     }
     // Handle mock answer via WS

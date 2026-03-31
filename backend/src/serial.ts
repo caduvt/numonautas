@@ -5,48 +5,87 @@ import { gameState, loadRandomQuestion } from './gameLogic';
 import { wsManager } from './websocket';
 import os from 'os';
 
+export let activeSerialPort: SerialPort | null = null;
+
+export function sendToFPGA(byte: number) {
+  if (activeSerialPort && activeSerialPort.isOpen) {
+    console.log(`[Serial -> FPGA] Sending byte: 0x${byte.toString(16).toUpperCase()}`);
+    activeSerialPort.write(Buffer.from([byte]));
+  }
+}
+
 export async function processSerialSignal(byte: number) {
-  console.log(`\n[Serial] Signal byte received: 0x${byte.toString(16).toUpperCase()}`);
+  console.log(`\n[FPGA -> Serial] Signal byte received: 0x${byte.toString(16).padStart(2, '0').toUpperCase()}`);
 
-  const isGameEvent = (byte & 0x80) !== 0; // Bit 7
+  // Decode FPGA packet
+  const somEnabled = (byte & 0x80) !== 0;       // Bit 7
+  const animacoesEnabled = (byte & 0x40) !== 0; // Bit 6
+  const difficultyBits = (byte >> 4) & 0x03;    // Bits 5:4
+  const evento = byte & 0x0F;                   // Bits 3:0
 
-  if (!isGameEvent) {
-    // Config Events (Bit 7 = 0)
-    if (byte & 0x20) { // Reset (0x20)
-      gameState.game_active = false;
-      wsManager.broadcast({ type: "GAME_STARTED", state: "start", first_question: null });
-    } else if (byte & 0x10) { // Start (0x10)
+  // Update Game State Configs
+  gameState.audio_enabled = somEnabled;
+  gameState.animacoes_enabled = animacoesEnabled;
+  
+  if (difficultyBits === 0) gameState.difficulty = 'easy';
+  else if (difficultyBits === 1) gameState.difficulty = 'medium';
+  else if (difficultyBits === 2) gameState.difficulty = 'hard';
+
+  // Always broadcast config in case it changed
+  wsManager.broadcast({ 
+    type: "CONFIG_UPDATE", 
+    difficulty: gameState.difficulty, 
+    audio_enabled: gameState.audio_enabled, 
+    animacoes_enabled: gameState.animacoes_enabled 
+  });
+
+  // Handle Eventos (Bits 3:0)
+  switch (evento) {
+    case 0x00: // Apenas Atualização de Configuração
+      // Já manipulado acima pelo broadcast
+      break;
+
+    case 0x01: // Iniciar Jogo
       gameState.game_active = true;
       gameState.level = 1;
       const question = loadRandomQuestion(gameState.difficulty, gameState.level);
       if (question) {
         wsManager.broadcast({ type: "GAME_STARTED", state: "playing", first_question: question });
+        // Enviar o gabarito para a FPGA imediatamente
+        sendToFPGA(1 << question.correct_index);
       }
-    } else if (byte & 0x08) { // Animações (0x08)
-      gameState.animacoes_enabled = !gameState.animacoes_enabled;
-      wsManager.broadcast({ type: "CONFIG_UPDATE", difficulty: gameState.difficulty, audio_enabled: gameState.audio_enabled, animacoes_enabled: gameState.animacoes_enabled });
-    } else if (byte & 0x04) { // Dificuldade (0x04)
-      const diffs: any[] = ['easy', 'medium', 'hard'];
-      const idx = (diffs.indexOf(gameState.difficulty) + 1) % diffs.length;
-      gameState.difficulty = diffs[idx];
-      wsManager.broadcast({ type: "CONFIG_UPDATE", difficulty: gameState.difficulty, audio_enabled: gameState.audio_enabled, animacoes_enabled: gameState.animacoes_enabled });
-    } else if (byte & 0x02) { // Som (0x02)
-      gameState.audio_enabled = !gameState.audio_enabled;
-      wsManager.broadcast({ type: "CONFIG_UPDATE", difficulty: gameState.difficulty, audio_enabled: gameState.audio_enabled, animacoes_enabled: gameState.animacoes_enabled });
-    }
-  } else {
-    // Game Events (Bit 7 = 1)
-    if ((byte & 0xC0) === 0xC0) { // Request next question (0xC0)
-      // Usually trigger is handled by index.ts via REQUEST_NEXT_QUESTION or handled here directly
-      // we'll let index.ts do it if we want, or just do it here:
-      const q = loadRandomQuestion(gameState.difficulty, gameState.level);
-      if (q) {
-        wsManager.broadcast({ type: "NEW_QUESTION", question: q });
+      break;
+
+    case 0x02: // Pedir Próxima Fase
+      gameState.level++;
+      const nextQ = loadRandomQuestion(gameState.difficulty, gameState.level);
+      if (nextQ) {
+        wsManager.broadcast({ type: "NEW_QUESTION", question: nextQ });
+        // Enviar gabarito da próxima fase
+        sendToFPGA(1 << nextQ.correct_index);
+      } else {
+        // Se retornar undefined, provavel fim das questoes. Poderia sinalizar fim pro Frontend.
+        // No momento apenas ignoramos (ou poderiamos enviar vitoria).
       }
-    } else { // Answer selection (0x80 to 0x83)
-      const optionIndex = byte & 0x7F; // Filter out top bit
-      wsManager.broadcast({ type: "ANSWER_SELECTED", index: optionIndex });
-    }
+      break;
+
+    case 0x03: // Acertou a Questão
+      wsManager.broadcast({ type: "ANSWER_SELECTED", status: "correct" }); // Adapte ao front
+      break;
+
+    case 0x04: // Errou a Questão
+      wsManager.broadcast({ type: "ANSWER_SELECTED", status: "wrong" }); // Adapte ao front
+      break;
+
+    case 0x05: // Reset (Voltar Home)
+      gameState.game_active = false;
+      gameState.level = 1;
+      wsManager.broadcast({ type: "GAME_STARTED", state: "start", first_question: null });
+      break;
+      
+    default:
+      console.warn(`[Serial] Evento não reconhecido: ${evento}`);
+      break;
   }
 }
 
@@ -88,6 +127,7 @@ export async function initSerial() {
 
     port.on('open', () => {
       console.log(`[Serial] Successfully connected to FPGA at ${portLocation} @ ${BAUD_RATE} 8N1`);
+      activeSerialPort = port;
     });
 
     parser.on('data', (data: Buffer) => {
@@ -98,10 +138,12 @@ export async function initSerial() {
 
     port.on('error', (err) => {
       console.error(`[Serial] Port Error:`, err.message);
+      activeSerialPort = null;
     });
 
     port.on('close', () => {
       console.warn(`[Serial] Port Closed. Retrying in 3 seconds...`);
+      activeSerialPort = null;
       setTimeout(initSerial, 3000); // Reconnection logic
     });
 

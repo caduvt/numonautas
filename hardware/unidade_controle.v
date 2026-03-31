@@ -12,6 +12,7 @@ module unidade_controle (
     
     output reg   zera_jogo,
     output reg   fpga_pronta,
+    output reg   em_jogo,
     output reg   captura_gabarito,
     output reg   aguarda_player,
     output reg   valida_res,
@@ -73,8 +74,11 @@ module unidade_controle (
 
     always @(*) begin
         zera_jogo = 0; fpga_pronta = 0; captura_gabarito = 0; 
-        aguarda_player = 0; valida_res = 0; 
+        aguarda_player = 0; valida_res = 0; em_jogo = 0;
         proximo_nivel = 0; sinaliza_erro = 0; vitoria = 0;
+        
+        // em_jogo is High for all states except INICIO
+        if (Eatual != INICIO) em_jogo = 1;
 
         case (Eatual)
             INICIO: begin

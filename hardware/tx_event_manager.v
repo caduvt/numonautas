@@ -2,6 +2,9 @@ module tx_event_manager (
     input        clock,
     input        reset,
     
+    // Status lock state
+    input        em_jogo,
+    
     // Sinais de Gatilho (Pulsos de 1 clock)
     input        pulso_som,
     input        pulso_dificuldade,
@@ -9,14 +12,10 @@ module tx_event_manager (
     input        pulso_start,
     input        pulso_reset, // (segurar 3s)
     
-    // Pedir Próxima Fase (Vem da FPGA pronta)
+    // Sinais de jogo
     input        pulso_proxima_fase,
-    
-    // Respostas (Gabarito clicado - pulsos)
-    input        pulso_resp_0,
-    input        pulso_resp_1,
-    input        pulso_resp_2,
-    input        pulso_resp_3,
+    input        pulso_acertou,
+    input        pulso_errou,
 
     // Interface com TX Serial
     input        tx_pronto,
@@ -24,107 +23,105 @@ module tx_event_manager (
     output reg [7:0] tx_dados
 );
 
+    // Registradores de Configuração (Estado)
+    reg reg_som;
+    reg reg_anim;
+    reg [1:0] reg_difi;
+
     // Registradores para guardar eventos pendentes (Flags)
     reg flag_som, flag_dificuldade, flag_animacoes, flag_start, flag_reset;
     reg flag_proxima_fase;
-    reg flag_resp_0, flag_resp_1, flag_resp_2, flag_resp_3;
+    reg flag_acertou, flag_errou;
 
-    // Estado do Gerenciador
+    // Estado do Gerenciador de TX
     reg [1:0] estado;
     localparam ESPERA = 2'b00, ENVIA = 2'b01, AGUARDA_TX_BAIXAR = 2'b10, AGUARDA_TX_SUBIR = 2'b11;
 
     always @(posedge clock or posedge reset) begin
         if (reset) begin
+            reg_som <= 1'b1;     // Padrão Ligado
+            reg_anim <= 1'b1;    // Padrão Ligado
+            reg_difi <= 2'b00;   // Fácil
+            
             flag_som <= 0;
             flag_dificuldade <= 0;
             flag_animacoes <= 0;
             flag_start <= 0;
             flag_reset <= 0;
             flag_proxima_fase <= 0;
-            flag_resp_0 <= 0;
-            flag_resp_1 <= 0;
-            flag_resp_2 <= 0;
-            flag_resp_3 <= 0;
+            flag_acertou <= 0;
+            flag_errou <= 0;
             
             estado <= ESPERA;
             tx_partida <= 0;
             tx_dados <= 8'h00;
         end else begin
-            // 1. Capturar qualquer pulso assíncrono (em relação ao TX) e guardar
-            if (pulso_som)          flag_som <= 1;
-            if (pulso_dificuldade)  flag_dificuldade <= 1;
-            if (pulso_animacoes)    flag_animacoes <= 1;
+            // 1. Atualizar configs internamente e setar flag para atualizar o PC
+            // Apenas se NÃO estiver em jogo (!em_jogo)
+            if (!em_jogo) begin
+                if (pulso_som) begin
+                    reg_som <= ~reg_som;
+                    flag_som <= 1;
+                end
+                if (pulso_animacoes) begin
+                    reg_anim <= ~reg_anim;
+                    flag_animacoes <= 1;
+                end
+                if (pulso_dificuldade) begin
+                    if (reg_difi == 2'd2) reg_difi <= 2'd0;
+                    else                  reg_difi <= reg_difi + 2'd1;
+                    flag_dificuldade <= 1;
+                end
+            end
+
+            // 2. Capturar outros eventos de jogo e comando
             if (pulso_start)        flag_start <= 1;
             if (pulso_reset)        flag_reset <= 1;
             if (pulso_proxima_fase) flag_proxima_fase <= 1;
-            
-            if (pulso_resp_0)       flag_resp_0 <= 1;
-            if (pulso_resp_1)       flag_resp_1 <= 1;
-            if (pulso_resp_2)       flag_resp_2 <= 1;
-            if (pulso_resp_3)       flag_resp_3 <= 1;
+            if (pulso_acertou)      flag_acertou <= 1;
+            if (pulso_errou)        flag_errou <= 1;
 
-            // 2. Máquina de Estados para Despacho
+            // 3. Máquina de Estados para Despacho via TX Serial
             case (estado)
                 ESPERA: begin
                     if (tx_pronto) begin
                         // Arbitragem por prioridade
-                        if (flag_proxima_fase) begin
-                            tx_dados <= 8'hC0; // 1100 0000
-                            flag_proxima_fase <= 0;
-                            tx_partida <= 1;
-                            estado <= ENVIA;
-                        end
-                        else if (flag_resp_0) begin
-                            tx_dados <= 8'h80; // 1000 0000
-                            flag_resp_0 <= 0;
-                            tx_partida <= 1;
-                            estado <= ENVIA;
-                        end
-                        else if (flag_resp_1) begin
-                            tx_dados <= 8'h81; // 1000 0001
-                            flag_resp_1 <= 0;
-                            tx_partida <= 1;
-                            estado <= ENVIA;
-                        end
-                        else if (flag_resp_2) begin
-                            tx_dados <= 8'h82; // 1000 0010
-                            flag_resp_2 <= 0;
-                            tx_partida <= 1;
-                            estado <= ENVIA;
-                        end
-                        else if (flag_resp_3) begin
-                            tx_dados <= 8'h83; // 1000 0011
-                            flag_resp_3 <= 0;
-                            tx_partida <= 1;
-                            estado <= ENVIA;
-                        end
-                        else if (flag_reset) begin
-                            tx_dados <= 8'h20; // 0010 0000
+                        if (flag_reset) begin
+                            tx_dados <= {reg_som, reg_anim, reg_difi, 4'b0101};
                             flag_reset <= 0;
                             tx_partida <= 1;
                             estado <= ENVIA;
                         end
                         else if (flag_start) begin
-                            tx_dados <= 8'h10; // 0001 0000
+                            tx_dados <= {reg_som, reg_anim, reg_difi, 4'b0001};
                             flag_start <= 0;
                             tx_partida <= 1;
                             estado <= ENVIA;
                         end
-                        else if (flag_animacoes) begin
-                            tx_dados <= 8'h08; // 0000 1000
-                            flag_animacoes <= 0;
+                        else if (flag_proxima_fase) begin
+                            tx_dados <= {reg_som, reg_anim, reg_difi, 4'b0010};
+                            flag_proxima_fase <= 0;
                             tx_partida <= 1;
                             estado <= ENVIA;
                         end
-                        else if (flag_dificuldade) begin
-                            tx_dados <= 8'h04; // 0000 0100
-                            flag_dificuldade <= 0;
+                        else if (flag_acertou) begin
+                            tx_dados <= {reg_som, reg_anim, reg_difi, 4'b0011};
+                            flag_acertou <= 0;
                             tx_partida <= 1;
                             estado <= ENVIA;
                         end
-                        else if (flag_som) begin
-                            tx_dados <= 8'h02; // 0000 0010
+                        else if (flag_errou) begin
+                            tx_dados <= {reg_som, reg_anim, reg_difi, 4'b0100};
+                            flag_errou <= 0;
+                            tx_partida <= 1;
+                            estado <= ENVIA;
+                        end
+                        else if (flag_som || flag_animacoes || flag_dificuldade) begin
+                            tx_dados <= {reg_som, reg_anim, reg_difi, 4'b0000};
+                            // Limpa qualquer flag de config pendente
                             flag_som <= 0;
+                            flag_animacoes <= 0;
+                            flag_dificuldade <= 0;
                             tx_partida <= 1;
                             estado <= ENVIA;
                         end

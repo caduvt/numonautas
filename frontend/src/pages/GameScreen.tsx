@@ -8,7 +8,7 @@ import { SpaceAvatar } from "../components/SpaceAvatar";
 import { motion } from "framer-motion";
 
 export function GameScreen() {
-  const { gameState, currentQuestion, selectedAnswerIndex, config } =
+  const { gameState, currentQuestion, selectedAnswerIndex, config, hardwareStatus } =
     useGameContext();
   const { requestNextQuestion, mockAnswer } = useGameHardware();
   const navigate = useNavigate();
@@ -24,7 +24,11 @@ export function GameScreen() {
 
   // Evaluate the answer when there's a selection via FPGA (or mock button)
   useEffect(() => {
-    if (selectedAnswerIndex !== null && currentQuestion) {
+    if (hardwareStatus === "correct") {
+      setIsCorrect(true);
+    } else if (hardwareStatus === "wrong") {
+      setIsCorrect(false);
+    } else if (selectedAnswerIndex !== null && currentQuestion) {
       if (selectedAnswerIndex === currentQuestion.correct_index) {
         setIsCorrect(true);
       } else {
@@ -33,7 +37,7 @@ export function GameScreen() {
     } else {
       setIsCorrect(null);
     }
-  }, [selectedAnswerIndex, currentQuestion, config.audio_enabled]);
+  }, [hardwareStatus, selectedAnswerIndex, currentQuestion, config.audio_enabled]);
 
   const handleContinue = () => {
     setIsCorrect(null);

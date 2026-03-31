@@ -14,6 +14,8 @@ interface GameContextType {
   setSelectedAnswerIndex: (i: number | null) => void;
   wsConnected: boolean;
   setWsConnected: (v: boolean) => void;
+  hardwareStatus: "correct" | "wrong" | null;
+  setHardwareStatus: (s: "correct" | "wrong" | null) => void;
 }
 
 const defaultContext: GameContextType = {
@@ -27,6 +29,8 @@ const defaultContext: GameContextType = {
   setSelectedAnswerIndex: () => {},
   wsConnected: false,
   setWsConnected: () => {},
+  hardwareStatus: null,
+  setHardwareStatus: () => {},
 };
 
 const GameContext = createContext<GameContextType>(defaultContext);
@@ -37,6 +41,7 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [selectedAnswerIndex, setSelectedAnswerIndex] = useState<number | null>(null);
   const [wsConnected, setWsConnected] = useState<boolean>(false);
+  const [hardwareStatus, setHardwareStatus] = useState<"correct" | "wrong" | null>(null);
 
   // Música ambiente global da aplicação
   const [playAmbient, { pause: pauseAmbient }] = useSound('/sounds/ambient.mp3', { 
@@ -66,6 +71,8 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setSelectedAnswerIndex,
         wsConnected,
         setWsConnected,
+        hardwareStatus,
+        setHardwareStatus,
       }}
     >
       {children}
