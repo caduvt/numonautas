@@ -1,6 +1,5 @@
 module fluxo_dados (
     input        clock,
-    input        reset,
 
     // Sinais de Controle
     input        zera_jogo,
@@ -41,8 +40,8 @@ module fluxo_dados (
     assign errou   = ~s_igual && tem_jogada;
     
     // 1. Contador de Nível (1 a 15)
-    always @(posedge clock or posedge reset) begin
-        if (reset) begin
+    always @(posedge clock) begin
+        if (zera_jogo) begin
             s_contador_nivel <= 4'd1;
         // Reset físico assíncrono
         end else if (zera_jogo) begin
@@ -70,7 +69,7 @@ module fluxo_dados (
     registrador_4 reg_jogada (
         .clock(clock),
         .clear(zera_jogo || proximo_nivel || fim_timer),
-        .enable(aguarda_player && s_jogada_feita),
+        .enable(s_jogada_feita),
         .D(botoes),
         .Q(s_registrador_out)
     );

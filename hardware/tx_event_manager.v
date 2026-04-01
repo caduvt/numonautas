@@ -82,67 +82,67 @@ module tx_event_manager (
             if (pulso_errou)        flag_errou <= 1;
 
             // 3. Máquina de Estados para Despacho via TX Serial
+            // 3. Máquina de Estados para Despacho via TX Serial
             case (estado)
                 ESPERA: begin
-                    if (tx_pronto) begin
-                        // Arbitragem por prioridade
-                        if (flag_reset) begin
-                            tx_dados <= {reg_som, reg_anim, reg_difi, 4'b0101};
-                            flag_reset <= 0;
-                            tx_partida <= 1;
-                            estado <= ENVIA;
-                        end
-                        else if (flag_start) begin
-                            tx_dados <= {reg_som, reg_anim, reg_difi, 4'b0001};
-                            flag_start <= 0;
-                            tx_partida <= 1;
-                            estado <= ENVIA;
-                        end
-                        else if (flag_proxima_fase) begin
-                            tx_dados <= {reg_som, reg_anim, reg_difi, 4'b0010};
-                            flag_proxima_fase <= 0;
-                            tx_partida <= 1;
-                            estado <= ENVIA;
-                        end
-                        else if (flag_acertou) begin
-                            tx_dados <= {reg_som, reg_anim, reg_difi, 4'b0011};
-                            flag_acertou <= 0;
-                            tx_partida <= 1;
-                            estado <= ENVIA;
-                        end
-                        else if (flag_errou) begin
-                            tx_dados <= {reg_som, reg_anim, reg_difi, 4'b0100};
-                            flag_errou <= 0;
-                            tx_partida <= 1;
-                            estado <= ENVIA;
-                        end
-                        else if (flag_som || flag_animacoes || flag_dificuldade) begin
-                            tx_dados <= {reg_som, reg_anim, reg_difi, 4'b0000};
-                            // Limpa qualquer flag de config pendente
-                            flag_som <= 0;
-                            flag_animacoes <= 0;
-                            flag_dificuldade <= 0;
-                            tx_partida <= 1;
-                            estado <= ENVIA;
-                        end
+                    // REMOVIDO o "if (tx_pronto)" daqui. 
+                    // Se estamos em ESPERA, o TX já está livre.
+                    if (flag_reset) begin
+                        tx_dados <= {reg_som, reg_anim, reg_difi, 4'b0101};
+                        flag_reset <= 0;
+                        tx_partida <= 1;
+                        estado <= ENVIA;
+                    end
+                    else if (flag_start) begin
+                        tx_dados <= {reg_som, reg_anim, reg_difi, 4'b0001};
+                        flag_start <= 0;
+                        tx_partida <= 1;
+                        estado <= ENVIA;
+                    end
+                    else if (flag_proxima_fase) begin
+                        tx_dados <= {reg_som, reg_anim, reg_difi, 4'b0010};
+                        flag_proxima_fase <= 0;
+                        tx_partida <= 1;
+                        estado <= ENVIA;
+                    end
+                    else if (flag_acertou) begin
+                        tx_dados <= {reg_som, reg_anim, reg_difi, 4'b0011};
+                        flag_acertou <= 0;
+                        tx_partida <= 1;
+                        estado <= ENVIA;
+                    end
+                    else if (flag_errou) begin
+                        tx_dados <= {reg_som, reg_anim, reg_difi, 4'b0100};
+                        flag_errou <= 0;
+                        tx_partida <= 1;
+                        estado <= ENVIA;
+                    end
+                    else if (flag_som || flag_animacoes || flag_dificuldade) begin
+                        tx_dados <= {reg_som, reg_anim, reg_difi, 4'b0000};
+                        flag_som <= 0;
+                        flag_animacoes <= 0;
+                        flag_dificuldade <= 0;
+                        tx_partida <= 1;
+                        estado <= ENVIA;
                     end
                 end
 
                 ENVIA: begin
-                    // Partida já subiu um clock
+                    // Abaixa o pulso de partida
                     tx_partida <= 0;
-                    estado <= AGUARDA_TX_BAIXAR;
-                end
-
-                AGUARDA_TX_BAIXAR: begin
-                    // Espera tx_pronto cair para confirmar que iniciou
-                    if (!tx_pronto) estado <= AGUARDA_TX_SUBIR;
+                    // Vai direto esperar o pulso de fim da UC do transmissor
+                    estado <= AGUARDA_TX_SUBIR; 
                 end
                 
+                // O estado AGUARDA_TX_BAIXAR se torna inútil nessa arquitetura, 
+                // pois o pulso 'pronto' é instantâneo no final da transmissão.
+                
                 AGUARDA_TX_SUBIR: begin
-                    // Espera tx_pronto subir para liberar o próximo envio
+                    // Fica travado aqui até o transmissor emitir o pulso de 'pronto' no estado final_tx
                     if (tx_pronto) estado <= ESPERA;
                 end
+                
+                default: estado <= ESPERA;
             endcase
         end
     end

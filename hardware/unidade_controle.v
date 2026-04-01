@@ -1,6 +1,5 @@
 module unidade_controle (
     input        clock,
-    input        reset,
     input        reset_home,
 
     input        btn_iniciar,
@@ -33,10 +32,10 @@ module unidade_controle (
 
     reg [3:0] Eatual, Eprox;
 
-    always @(posedge clock or posedge reset) begin
-        if (reset) begin
-            Eatual <= INICIO;
-        end else if (reset_home) begin
+    initial Eatual = INICIO;
+
+    always @(posedge clock) begin
+        if (reset_home) begin
             Eatual <= INICIO;
         end else begin
             Eatual <= Eprox;
