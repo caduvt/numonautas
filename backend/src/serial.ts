@@ -1,7 +1,11 @@
 import { SerialPort } from "serialport";
 import { ByteLengthParser } from "@serialport/parser-byte-length";
 import { getDefaultSerialPort, BAUD_RATE } from "./config";
-import { gameState, loadRandomQuestion } from "./gameLogic";
+import {
+  gameState,
+  loadRandomQuestion,
+  resetPlayedQuestions,
+} from "./gameLogic";
 import { wsManager } from "./websocket";
 import os from "os";
 
@@ -35,6 +39,11 @@ export async function processSerialSignal(byte: number) {
   else if (difficultyBits === 1) gameState.difficulty = "medium";
   else if (difficultyBits === 2) gameState.difficulty = "hard";
 
+  // Debug: Exibe o estado decodificado das configurações
+  console.log(
+    `[Debug] Configs decodificadas -> Som: ${somEnabled ? "ON" : "OFF"} | Animações: ${animacoesEnabled ? "ON" : "OFF"} | Dificuldade: ${gameState.difficulty}`,
+  );
+
   // Always broadcast config in case it changed
   wsManager.broadcast({
     type: "CONFIG_UPDATE",
@@ -46,12 +55,16 @@ export async function processSerialSignal(byte: number) {
   // Handle Eventos (Bits 3:0)
   switch (evento) {
     case 0x00: // Apenas Atualização de Configuração
-      // Já manipulado acima pelo broadcast
+      console.log(
+        "[Ação] 0x00: Atualização de Configurações (Nenhum evento de jogo disparado).",
+      );
       break;
 
     case 0x01: // Iniciar Jogo
+      console.log("[Ação] 0x01: Iniciando o Jogo (Nível 1).");
       gameState.game_active = true;
       gameState.level = 1;
+      resetPlayedQuestions();
       const question = loadRandomQuestion(
         gameState.difficulty,
         gameState.level,
@@ -63,34 +76,31 @@ export async function processSerialSignal(byte: number) {
           first_question: question,
         });
         // Enviar o gabarito para a FPGA imediatamente
+        console.log(
+          `[Debug] Enviando gabarito da Questão 1 (Index: ${question.correct_index}) para FPGA.`,
+        );
         sendToFPGA(1 << question.correct_index);
       }
       break;
 
     case 0x02: // Pedir Próxima Fase
-      gameState.level++;
-      const nextQ = loadRandomQuestion(gameState.difficulty, gameState.level);
-      if (nextQ) {
-        wsManager.broadcast({ type: "NEW_QUESTION", question: nextQ });
-        // Enviar gabarito da próxima fase
-        sendToFPGA(1 << nextQ.correct_index);
-      } else {
-        // Se retornar undefined, provavel fim das questoes. Poderia sinalizar fim pro Frontend.
-        // No momento apenas ignoramos (ou poderiamos enviar vitoria).
-      }
       break;
 
     case 0x03: // Acertou a Questão
+      console.log("[Ação] 0x03: O jogador ACERTOU a questão atual.");
       wsManager.broadcast({ type: "ANSWER_SELECTED", status: "correct" }); // Adapte ao front
       break;
 
     case 0x04: // Errou a Questão
+      console.log("[Ação] 0x04: O jogador ERROU a questão atual.");
       wsManager.broadcast({ type: "ANSWER_SELECTED", status: "wrong" }); // Adapte ao front
       break;
 
     case 0x05: // Reset (Voltar Home)
+      console.log("[Ação] 0x05: Reset do Jogo (Voltando para a tela inicial).");
       gameState.game_active = false;
       gameState.level = 1;
+      resetPlayedQuestions();
       wsManager.broadcast({
         type: "GAME_STARTED",
         state: "start",
@@ -151,9 +161,7 @@ export async function initSerial() {
     });
 
     parser.on("data", (data: Buffer) => {
-      console.log("received dataaaa:", data);
       if (data.length > 0) {
-        console.log("Received data:", data);
         processSerialSignal(data[0]);
       }
     });
