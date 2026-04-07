@@ -10,6 +10,7 @@ export function useGameHardware() {
     setCurrentQuestion,
     setSelectedAnswerIndex,
     setWsConnected,
+    setHardwareStatus,
   } = useGameContext();
 
   const connect = useCallback(() => {
@@ -38,17 +39,22 @@ export function useGameHardware() {
             });
             break;
           case "GAME_STARTED":
-            setGameState("playing");
+            setGameState(data.state);
             setCurrentQuestion(data.first_question);
             setSelectedAnswerIndex(null);
+            setHardwareStatus(null);
             break;
           case "ANSWER_SELECTED":
-            // FPGA board sends answer index
-            setSelectedAnswerIndex(data.index);
+            if (data.index !== undefined) {
+              setSelectedAnswerIndex(data.index);
+            } else if (data.status) {
+              setHardwareStatus(data.status);
+            }
             break;
           case "NEW_QUESTION":
             setCurrentQuestion(data.question);
             setSelectedAnswerIndex(null);
+            setHardwareStatus(null);
             break;
         }
       } catch (err) {
@@ -72,6 +78,7 @@ export function useGameHardware() {
     setCurrentQuestion,
     setSelectedAnswerIndex,
     setWsConnected,
+    setHardwareStatus,
   ]);
 
   useEffect(() => {
@@ -107,8 +114,9 @@ export function useGameHardware() {
         correct_index: 2
       });
       setSelectedAnswerIndex(null);
+      setHardwareStatus(null);
     }
-  }, [sendAction, setGameState, setCurrentQuestion, setSelectedAnswerIndex]);
+  }, [sendAction, setGameState, setCurrentQuestion, setSelectedAnswerIndex, setHardwareStatus]);
   
   const mockAnswer = useCallback((index: number) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
