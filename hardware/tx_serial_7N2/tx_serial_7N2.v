@@ -1,27 +1,22 @@
 /* -------------------------------------------------------------
- * Arquivo   : tx_serial_7N2.v
+ * Arquivo   : tx_serial_8N1.v
  *--------------------------------------------------------------
  * Descricao : circuito base de transmissao serial assincrona 
- *             ==> comunicacao serial de 7 bits de dados, 
- *                 sem partidade, 2 stop bits e 9600 bauds
+ *             ==> comunicacao serial de 8 bits de dados, 
+ *                 sem paridade, 1 stop bit e 115200 bauds
  * 
  * entradas : partida, dados_ascii
  * saidas   : saida_serial, pronto
  * depuracao: db_clock, db_tick, db_partida, db_saida_serial
  *            e db_estado
- *
- *--------------------------------------------------------------
- * Revisoes  :
- *     Data        Versao  Autor             Descricao
- *     30/08/2025  1.0     Edson Midorikawa  criacao
  *--------------------------------------------------------------
  */
  
-module tx_serial_7N2 (
+module tx_serial_8N1 (
     input        clock           ,
     input        reset           ,
     input        partida         , // entradas
-    input [6:0]  dados_ascii     ,
+    input [7:0]  dados_ascii     , // CORRIGIDO: Agora recebe 8 bits
     output       saida_serial    , // saidas
     output       pronto          ,
     output       db_clock        , // saidas de depuracao
@@ -43,12 +38,12 @@ module tx_serial_7N2 (
     wire       s_saida_serial ;
     wire [3:0] s_estado       ;
 
-	 // sinais reset e partida (ativos em alto - GPIO)
+    // sinais reset e partida (ativos em alto - GPIO)
     assign s_reset   = reset;
     assign s_partida = partida;
-	 
+     
     // fluxo de dados
-    tx_serial_7N2_fd U1_FD (
+    tx_serial_8N1_fd U1_FD (
         .clock        ( clock          ),
         .reset        ( s_reset        ),
         .zera         ( s_zera         ),
@@ -60,9 +55,8 @@ module tx_serial_7N2 (
         .fim          ( s_fim          )
     );
 
-
     // unidade de controle
-    tx_serial_uc U2_UC (
+    tx_serial_8N1_uc U2_UC (
         .clock     ( clock        ),
         .reset     ( s_reset      ),
         .partida   ( s_partida_ed ),
@@ -77,11 +71,10 @@ module tx_serial_7N2 (
     );
 
     // gerador de tick
-    // fator de divisao para 9600 bauds (5208=50M/9600) 13 bits
     // fator de divisao para 115.200 bauds (434=50M/115200) 9 bits
     contador_m #(
-        .M(434),      // 115200 bauds (era 5208) 
-        .N(9)         // (era 13)
+        .M(434),      // 115200 bauds 
+        .N(9)         
      ) U3_TICK (
         .clock   ( clock  ),
         .zera_as ( 1'b0   ),
@@ -92,7 +85,6 @@ module tx_serial_7N2 (
         .meio    (        )
     );
 
-
     // detetor de borda para tratar pulsos largos
     edge_detector U4_ED (
         .clock ( clock        ),
@@ -100,7 +92,6 @@ module tx_serial_7N2 (
         .sinal ( s_partida    ),
         .pulso ( s_partida_ed )
     );
-
 
     // saida serial
     assign saida_serial = s_saida_serial;

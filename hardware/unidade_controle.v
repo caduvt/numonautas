@@ -65,7 +65,7 @@ module unidade_controle (
             
             MOSTRA_RES_ERRO:  Eprox = fim_timer ? AGUARDAR_INPUT : MOSTRA_RES_ERRO;
             
-            FINAL_VITORIA:    Eprox = FINAL_VITORIA; 
+            FINAL_VITORIA:    Eprox = INICIO; 
             
             default:          Eprox = INICIO;
         endcase

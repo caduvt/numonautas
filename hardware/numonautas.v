@@ -37,6 +37,9 @@ module numonautas (
     wire       w_pc_pronto;
     wire       w_fpga_pronta;
 
+    reg power_on_reset = 1'b1;
+    always @(posedge clock) power_on_reset <= 1'b0;
+
     // Fios internos para Event Manager
     wire pulso_som, pulso_difi, pulso_anim, pulso_iniciar;
     wire w_em_jogo;
@@ -46,43 +49,59 @@ module numonautas (
     wire w_tx_partida;
     wire [7:0] w_tx_dados;
 
-    // Detectores de borda p/ enviar cliques
-    edge_detector ed_som(.clock(clock), .reset(reset_home), .sinal(btn_som), .pulso(pulso_som));
-    edge_detector ed_difi(.clock(clock), .reset(reset_home), .sinal(btn_dificuldade), .pulso(pulso_difi));
-    edge_detector ed_anim(.clock(clock), .reset(reset_home), .sinal(btn_animacoes), .pulso(pulso_anim));
-    edge_detector ed_ini(.clock(clock), .reset(reset_home), .sinal(btn_iniciar_ext), .pulso(pulso_iniciar));
-    
-    // Antigos edge detectors dos botoes foram removidos porque a comparacao agora
-    // gera o pulso de acerto/erro depois do processamento, entao checamos as transicoes deles.
-    edge_detector ed_acertou(.clock(clock), .reset(reset_home), .sinal(acertou), .pulso(pulso_acertou));
-    edge_detector ed_errou(.clock(clock), .reset(reset_home), .sinal(errou), .pulso(pulso_errou));
+    // --- FIOS PARA SINAIS COM DEBOUNCE ---
+    wire w_som_limpo, w_difi_limpo, w_anim_limpo, w_ini_limpo;
+    wire pulso_fpga_pronta;
+    wire [3:0] w_botoes_limpos;
 
-    // Instanciação do Queue Manager (Arbitra qual pacote eviar no TX)
+// --- INSTANCIAÇÃO DOS DEBOUNCERS ---
+    // MUDANÇA: Usar power_on_reset. Isso impede que eles criem transições falsas no reset do jogo.
+    debounce db_som  (.clock(clock), .reset(power_on_reset), .botao_ruido(btn_som),         .botao_limpo(w_som_limpo));
+    debounce db_difi (.clock(clock), .reset(power_on_reset), .botao_ruido(btn_dificuldade), .botao_limpo(w_difi_limpo));
+    debounce db_anim (.clock(clock), .reset(power_on_reset), .botao_ruido(btn_animacoes),   .botao_limpo(w_anim_limpo));
+    debounce db_ini  (.clock(clock), .reset(power_on_reset), .botao_ruido(btn_iniciar_ext), .botao_limpo(w_ini_limpo));
+
+    debounce db_b0 (.clock(clock), .reset(power_on_reset), .botao_ruido(botoes[0]), .botao_limpo(w_botoes_limpos[0]));
+    debounce db_b1 (.clock(clock), .reset(power_on_reset), .botao_ruido(botoes[1]), .botao_limpo(w_botoes_limpos[1]));
+    debounce db_b2 (.clock(clock), .reset(power_on_reset), .botao_ruido(botoes[2]), .botao_limpo(w_botoes_limpos[2]));
+    debounce db_b3 (.clock(clock), .reset(power_on_reset), .botao_ruido(botoes[3]), .botao_limpo(w_botoes_limpos[3]));
+
+    // --- DETECTORES DE BORDA ---
+    // MUDANÇA: Usar power_on_reset
+    edge_detector ed_som (.clock(clock), .reset(power_on_reset), .sinal(w_som_limpo),  .pulso(pulso_som));
+    edge_detector ed_difi(.clock(clock), .reset(power_on_reset), .sinal(w_difi_limpo), .pulso(pulso_difi));
+    edge_detector ed_anim(.clock(clock), .reset(power_on_reset), .sinal(w_anim_limpo), .pulso(pulso_anim));
+    edge_detector ed_ini (.clock(clock), .reset(power_on_reset), .sinal(w_ini_limpo),  .pulso(pulso_iniciar));
+    
+    // NOTA: Os detectores abaixo podem manter o reset_home, pois leem estados virtuais do jogo:
+    edge_detector ed_acertou(.clock(clock), .reset(reset_home), .sinal(acertou), .pulso(pulso_acertou));
+    edge_detector ed_errou  (.clock(clock), .reset(reset_home), .sinal(errou),   .pulso(pulso_errou));
+// Instanciação do Queue Manager (Arbitra qual pacote eviar no TX)
     tx_event_manager event_manager (
-        .clock(clock), .reset(reset_home),
+        .clock(clock), 
+        .reset(power_on_reset), // MUDANÇA AQUI: Mantém o módulo vivo para conseguir disparar a mensagem
         .em_jogo(w_em_jogo),
         .pulso_som(pulso_som), .pulso_dificuldade(pulso_difi), .pulso_animacoes(pulso_anim),
-        .pulso_start(pulso_iniciar), .pulso_reset(reset_home), // reset_home gerado na holding de 3s do btn
-        .pulso_proxima_fase(w_fpga_pronta),
+        .pulso_start(pulso_iniciar), 
+        .pulso_reset(reset_home), // O reset_home entra AQUI, atuando só como um gatilho para enviar 0x05
+        .pulso_proxima_fase(proximo_nivel),
         .pulso_acertou(pulso_acertou), .pulso_errou(pulso_errou),
         .tx_pronto(w_tx_pronto), .tx_partida(w_tx_partida), .tx_dados(w_tx_dados)
     );
 
     // ---> INSTÂNCIA DO RECEPTOR (RX) <---
-    // Ele escuta o pino RX e gera o gabarito e o aviso de pc_pronto
     rx_serial_8N1 receptor (
         .clock      (clock),
-        .reset      (reset_home),
+        .reset      (power_on_reset), // MUDANÇA AQUI
         .RX         (RX),
         .dados_ascii(w_dados_rx),
-        .pronto     (w_pc_pronto) // O RX avisa que chegou os dados do PC
+        .pronto     (w_pc_pronto) 
     );
 
     // ---> INSTÂNCIA DO TRANSMISSOR (TX) <---
-    // A FPGA usa ele para avisar o PC de status, de request e botoes config
-    tx_serial_7N2 transmissor (
+    tx_serial_8N1 transmissor (
         .clock       (clock),
-        .reset       (reset_home),
+        .reset       (power_on_reset), // MUDANÇA AQUI
         .partida     (w_tx_partida),
         .dados_ascii (w_tx_dados),
         .saida_serial(TX),
@@ -92,7 +111,7 @@ module numonautas (
     unidade_controle uc (
         .clock(clock),
         .reset_home(reset_home), 
-        .btn_iniciar(btn_iniciar_ext),
+        .btn_iniciar(pulso_iniciar),
         .pc_pronto(w_pc_pronto), //nova conexão do sinal pc_pronto vindo do receptor serial
         .acertou(acertou),
         .errou(errou),
@@ -117,9 +136,12 @@ module numonautas (
         .proximo_nivel(proximo_nivel),
         .sinaliza_erro(sinaliza_erro),
         .captura_gabarito(captura_gabarito),
-        .botoes(botoes),
-        .btn_iniciar_ext(btn_iniciar_ext),
-        .resposta_pc(w_dados_rx), //passa os 8 bits
+        
+        // CORREÇÕES AQUI:
+        .botoes(w_botoes_limpos),       // Entrega os botões limpos e já em lógica positiva
+        .btn_iniciar_ext(w_ini_limpo),  // Entrega o botão start limpo pro Timer de 3s
+        
+        .resposta_pc(w_dados_rx),
         .leds(leds),
         .db_nivel(db_nivel),
         .db_jogada(db_jogada),

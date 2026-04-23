@@ -35,27 +35,52 @@ const defaultContext: GameContextType = {
 
 const GameContext = createContext<GameContextType>(defaultContext);
 
-export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const GameProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [gameState, setGameState] = useState<GameState>("start");
-  const [config, setConfig] = useState<GameConfig>({ difficulty: "easy", audio_enabled: true, animacoes_enabled: true });
+  const [config, setConfig] = useState<GameConfig>({
+    difficulty: "easy",
+    audio_enabled: true,
+    animacoes_enabled: true,
+  });
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
-  const [selectedAnswerIndex, setSelectedAnswerIndex] = useState<number | null>(null);
+  const [selectedAnswerIndex, setSelectedAnswerIndex] = useState<number | null>(
+    null,
+  );
   const [wsConnected, setWsConnected] = useState<boolean>(false);
-  const [hardwareStatus, setHardwareStatus] = useState<"correct" | "wrong" | null>(null);
+  const [hardwareStatus, setHardwareStatus] = useState<
+    "correct" | "wrong" | null
+  >(null);
 
   // Música ambiente global da aplicação
-  const [playAmbient, { pause: pauseAmbient }] = useSound('/sounds/ambient.mp3', { 
-    loop: true, 
-    volume: 0.08 
-  });
+  const [playAmbient, { pause: pauseAmbient }] = useSound(
+    "/sounds/ambient.mp3",
+    {
+      loop: true,
+      volume: 0.08,
+    },
+  );
 
   // Toca ou pausa o áudio baseado nas configurações recebidas pela placa
   useEffect(() => {
+    // Tenta tocar a música se estiver habilitada
     if (config.audio_enabled) {
       playAmbient();
     } else {
       pauseAmbient();
     }
+
+    // DESBLOQUEIO DE AUTOPLAY: Se o navegador bloquear, o primeiro clique na tela libera a música
+    const unlockAudio = () => {
+      if (config.audio_enabled) {
+        playAmbient();
+      }
+      window.removeEventListener("click", unlockAudio);
+    };
+    window.addEventListener("click", unlockAudio);
+
+    return () => window.removeEventListener("click", unlockAudio);
   }, [config.audio_enabled, playAmbient, pauseAmbient]);
 
   return (
@@ -80,4 +105,5 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useGameContext = () => useContext(GameContext);

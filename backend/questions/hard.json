@@ -242,7 +242,7 @@
     "type": "expression",
     "question": "2² × 5 + 3 = ?",
     "options": ["23", "22", "21", "24"],
-    "correctIndex": 1
+    "correctIndex": 0
   },
   {
     "id": "hard-level3-8",
@@ -260,7 +260,7 @@
     "type": "expression",
     "question": "3³ - 5 = ?",
     "options": ["20", "21", "22", "19"],
-    "correctIndex": 1
+    "correctIndex": 2
   },
   {
     "id": "hard-level3-10",

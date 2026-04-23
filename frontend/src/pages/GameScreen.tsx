@@ -8,8 +8,13 @@ import { SpaceAvatar } from "../components/SpaceAvatar";
 import { motion } from "framer-motion";
 
 export function GameScreen() {
-  const { gameState, currentQuestion, selectedAnswerIndex, config, hardwareStatus } =
-    useGameContext();
+  const {
+    gameState,
+    currentQuestion,
+    selectedAnswerIndex,
+    config,
+    hardwareStatus,
+  } = useGameContext();
   const { requestNextQuestion, mockAnswer } = useGameHardware();
   const navigate = useNavigate();
 
@@ -37,7 +42,12 @@ export function GameScreen() {
     } else {
       setIsCorrect(null);
     }
-  }, [hardwareStatus, selectedAnswerIndex, currentQuestion, config.audio_enabled]);
+  }, [
+    hardwareStatus,
+    selectedAnswerIndex,
+    currentQuestion,
+    config.audio_enabled,
+  ]);
 
   const handleContinue = () => {
     setIsCorrect(null);
@@ -65,6 +75,7 @@ export function GameScreen() {
         audioEnabled={config.audio_enabled}
         animacoesEnabled={config.animacoes_enabled}
         onContinue={handleContinue}
+        currentLevel={currentQuestion.game_level ?? 1}
       />
 
       {/* Main Grid Layout */}
@@ -88,8 +99,15 @@ export function GameScreen() {
         {/* Right Column: Game Board */}
         <div className="flex flex-col h-full bg-slate-800/30 backdrop-blur-lg rounded-[3rem] p-6 lg:p-10 border border-indigo-400/10 shadow-[0_0_50px_rgba(30,27,75,0.5)]">
           {/* Question Display */}
-          <div className="flex-1 flex items-center justify-center bg-indigo-950/40 rounded-3xl border border-indigo-500/20 p-8 mb-8 shadow-inner shadow-indigo-950/80 min-h-[35vh]">
-            <h1 className="text-8xl md:text-[8rem] lg:text-[12rem] font-bold tracking-wider text-center text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.5)] astro-title leading-none">
+          <div className="flex-1 flex flex-col items-center justify-center bg-indigo-950/40 rounded-3xl border border-indigo-500/20 p-8 mb-8 shadow-inner shadow-indigo-950/80 min-h-[35vh] relative overflow-hidden">
+            {/* NOVO: Número Gigante em Marca d'água no fundo */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.06]">
+              <span className="text-[18rem] md:text-[25rem] font-black text-indigo-100 font-nunito leading-none">
+                {currentQuestion.game_level || 1}
+              </span>
+            </div>
+
+            <h1 className="relative z-10 text-8xl md:text-[8rem] lg:text-[12rem] font-bold tracking-wider text-center text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.5)] astro-title leading-none">
               {currentQuestion.expression}
             </h1>
           </div>

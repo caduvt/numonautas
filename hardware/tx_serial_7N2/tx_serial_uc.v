@@ -1,20 +1,11 @@
 /* ----------------------------------------------------------------
- * Arquivo   : tx_serial_uc.v
- * Projeto   : Experiencia 2 - Transmissao Serial Assincrona
+ * Arquivo   : tx_serial_8N1_uc.v
  * ----------------------------------------------------------------
- * Descricao : unidade de controle do circuito da experiencia 2 
- * => implementa superamostragem (tick)
- * => independente da configuracao de transmissao (7O1, 8N2, etc)
- * ----------------------------------------------------------------
- * Revisoes  :
- *     Data        Versao  Autor             Descricao
- *     09/09/2021  1.0     Edson Midorikawa  versao inicial em VHDL
- *     27/08/2024  4.0     Edson Midorikawa  conversao para Verilog
- *     30/08/2025  4.1     Edson Midorikawa  revisao
+ * Descricao : unidade de controle do circuito de transmissao 8N1
  * ----------------------------------------------------------------
  */
 
-module tx_serial_uc ( 
+module tx_serial_8N1_uc ( 
     input      clock          ,
     input      reset          ,
     input      partida        ,

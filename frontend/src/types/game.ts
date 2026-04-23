@@ -10,10 +10,16 @@ export interface Question {
   expression: string;
   options: number[];
   correct_index: number;
+  game_level?: number;
 }
 
 export type WsMessage =
-  | { type: "CONFIG_UPDATE"; difficulty: "easy" | "medium" | "hard"; audio_enabled: boolean; animacoes_enabled: boolean }
+  | {
+      type: "CONFIG_UPDATE";
+      difficulty: "easy" | "medium" | "hard";
+      audio_enabled: boolean;
+      animacoes_enabled: boolean;
+    }
   | { type: "GAME_STARTED"; state: GameState; first_question: Question | null }
   | { type: "ANSWER_SELECTED"; index?: number; status?: "correct" | "wrong" }
   | { type: "NEW_QUESTION"; question: Question }

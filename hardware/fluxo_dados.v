@@ -32,30 +32,29 @@ module fluxo_dados (
     wire s_jogada_feita;
     wire [3:0] s_sinal_leds;
     // Registrador interno para contagem de nível explícita
-    reg [3:0] s_contador_nivel;
+    reg [4:0] s_contador_nivel;
     
     // --- Mapeamento de Status ---
     wire tem_jogada = (s_registrador_out != 4'b0000); 
-    assign acertou = s_igual && tem_jogada;
-    assign errou   = ~s_igual && tem_jogada;
+    
+    // GATILHO SEGURO: Só permite que acertou/errou fiquem em 1 se a UC estiver prestando atenção!
+    assign acertou = s_igual && tem_jogada && (aguarda_player || valida_res);
+    assign errou   = ~s_igual && tem_jogada && (aguarda_player || valida_res);
     
     // 1. Contador de Nível (1 a 15)
     always @(posedge clock) begin
         if (zera_jogo) begin
-            s_contador_nivel <= 4'd1;
-        // Reset físico assíncrono
-        end else if (zera_jogo) begin
-            s_contador_nivel <= 4'd1;
+            s_contador_nivel <= 5'd1;
         // Reset síncrono gerado pela UC
         end else if (proximo_nivel) begin
-            if (s_contador_nivel < 4'd15) begin
-                s_contador_nivel <= s_contador_nivel + 4'd1;
+            if (s_contador_nivel <= 5'd15) begin
+                s_contador_nivel <= s_contador_nivel + 5'd1;
             end
         end
     end
 
-    // Sinaliza à Unidade de Controle que chegou ao nível máximo
-    assign nivel_limite = (s_contador_nivel == 4'd15);
+    // Sinaliza à Unidade de Controle que o jogo acabou (ultrapassou a fase 15)
+    assign nivel_limite = (s_contador_nivel > 5'd15);
     
     // 2. Detector de Jogada
     edge_detector detector (
@@ -92,7 +91,7 @@ module fluxo_dados (
     );
     
     // 6. Timer de Exibição de Erro
-    contador_m #(.M(100000000), .N(11)) timer_exibicao (
+    contador_m #(.M(100000000), .N(27)) timer_exibicao (
         .clock(clock),
         .zera_as(1'b0),
         .zera_s(zera_jogo || proximo_nivel),
@@ -118,7 +117,7 @@ module fluxo_dados (
     assign leds = (sinaliza_erro || aguarda_player) ? s_sinal_leds : 4'b0000;
 
     // Saídas
-    assign db_nivel = s_contador_nivel;
+    assign db_nivel = (s_contador_nivel > 5'd15) ? 4'd15 : s_contador_nivel[3:0];
     assign db_jogada = s_registrador_out;
 
 endmodule
